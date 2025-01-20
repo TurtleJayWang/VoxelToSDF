@@ -70,7 +70,7 @@ class ModelTrainer:
 
                 self.optimizer.step()
             
-            self.losses = torch.cat((self.losses, (batch_loss / length)))
+            self.losses = torch.cat((self.losses, (batch_loss.cpu() / length)))
 
             self.save_parameters(self.epoch_start + k)
             self.save_loss(self.epoch_start + k)
