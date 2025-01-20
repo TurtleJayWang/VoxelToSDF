@@ -65,7 +65,7 @@ def generate_sdf_objs(dataset_json_path, fullmodel : module.FullNetwork, config 
             _, _, voxel_grid = fulldata["points"], fulldata["sdfs"], fulldata["voxel_grid"]
 
             # Get the sdf values from model
-            sdfs = get_sdf_from_model(fullmodel, voxel_grid)
+            sdfs = get_sdf_from_model(fullmodel, voxel_grid, config)
             
             # Marching Cube
             verts, faces, normals, _ = measure.marching_cubes(sdfs, 0)
