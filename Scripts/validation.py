@@ -9,6 +9,8 @@ import numpy as np
 
 from module import FullNetwork, SDFDecoder, VoxelCNNEncoder
 import config
+import sys
+sys.path.append("./")
 from dataset.utils.torch_load import create_test_validation_data_loader, VoxelSDFDataset
 
 import logging
