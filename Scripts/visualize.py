@@ -42,7 +42,7 @@ def get_sdf_from_model(full_network : module.FullNetwork, voxel_grid : np.ndarra
     for points_split in points_splits:
         sdf = torch.cat(sdf, decoder(latent_code, points_split).cpu())
 
-    sdfs = sdfs.view((100, 100, 100, 3))
+    sdfs = sdfs.view((100, 100, 100))
     sdfs = sdfs.numpy()
     return sdfs
 
