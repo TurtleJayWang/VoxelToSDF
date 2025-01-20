@@ -17,21 +17,18 @@ class VoxelCNNEncoder(nn.Module):
         self.encoder = nn.Sequential(
             # First block
             nn.Conv3d(1, 16, kernel_size=3, stride=2, padding=1),
-            nn.BatchNorm3d(16),
             nn.ReLU(),
             nn.MaxPool3d(kernel_size=2, stride=2),
             nn.Dropout3d(0.3),
             
             # Second block
             nn.Conv3d(16, 32, kernel_size=3, stride=2, padding=1),
-            nn.BatchNorm3d(32),
             nn.ReLU(),
             nn.MaxPool3d(kernel_size=2, stride=2),
             nn.Dropout3d(0.3),
             
             # Third block
             nn.Conv3d(32, 64, kernel_size=3, stride=2, padding=1),
-            nn.BatchNorm3d(64),
             nn.ReLU(),
             nn.MaxPool3d(kernel_size=2, stride=2),
             nn.Dropout3d(0.3),
@@ -56,7 +53,6 @@ class VoxelCNNEncoder(nn.Module):
         
         # Final fully connected layers with skip connection
         x = self.fc1(features)
-        x = self.bn1(x)
         x = F.relu(x)
         x = F.dropout(x, p=0.3, training=self.training)
         x = self.fc2(x)
