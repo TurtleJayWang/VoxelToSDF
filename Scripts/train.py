@@ -46,7 +46,7 @@ class ModelTrainer:
         for k in tqdm(range(self.epoch), desc="Epoch", position=2):
             batch_loss = torch.zeros(1).to(self.config.device)
             length = 0
-            """for i, (voxel_tensor, point, sdf) in tqdm(enumerate(self.dataloader), desc="Batch", position=3, ncols=80, leave=False):
+            for i, (voxel_tensor, point, sdf) in tqdm(enumerate(self.dataloader), desc="Batch", position=3, ncols=80, leave=False):
                 point = rearrange(point, "b s c -> (b s) c")
                 sdf = rearrange(sdf, "b s c -> (b s) c")
 
@@ -68,7 +68,7 @@ class ModelTrainer:
                 self.optimizer.zero_grad()
                 loss.backward()
 
-                self.optimizer.step()"""
+                self.optimizer.step()
             
             self.losses = torch.cat((self.losses, (batch_loss.cpu() / length)))
 
