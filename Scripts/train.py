@@ -97,7 +97,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.WARNING)
 
     cfg = config.Config()
-    train_dataloader, validation_loader = create_test_validation_data_loader(
+    train_dataloader, _ = create_test_validation_data_loader(
         dataset_dir=cfg.dataset_path,
         batch_size=32,
         dataset_config_file="dataset/config.json",
