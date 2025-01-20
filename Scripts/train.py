@@ -18,11 +18,13 @@ import numpy as np
 from tqdm import tqdm
 import logging
 import pickle
+import glob
 import argparse
 
 class ModelTrainer:
     def __init__(self, train_dataloader : DataLoader, config : config.Config):
         self.epoch = config.train_epoch
+        self.epoch_start = 0
         self.dataloader = train_dataloader
         self.network = FullNetwork(config=config)
         self.device = config.device
@@ -69,27 +71,31 @@ class ModelTrainer:
             
             self.losses.append(batch_loss / length)
 
-            self.save_parameters(k)
-            self.save_loss(k)
+            self.save_parameters(self.epoch_start + k)
+            self.save_loss(self.epoch_start + k)
         
     def save_parameters(self, k):
+        name = f"{os.path.splitext(self.checkpoint_filename)[0]}.{k}{os.path.splitext(self.checkpoint_filename)[1]}"
         with open(self.checkpoint_filename, "wb") as cp_f:
             torch.save(self.network.state_dict(), cp_f)
         
     def load_parameters(self, k):
-        if os.path.exists(self.checkpoint_filename):
-            name = os.path.splitext(self.checkpoint_filename)[0] + f"_{k}" + os.path.splitext(self.checkpoint_filename)[1]
-            with open(name, "b+r") as cp_f:
+        names = glob.glob(f"{os.path.splitext(self.checkpoint_filename)[0]}.*{os.path.splitext(self.checkpoint_filename)[1]}")[-1]
+        if len(names):
+            self.epoch_start = int(names[-1].split(".")[1]) + 1
+            with open(names[-1], "b+r") as cp_f:
                 self.network.load_state_dict(torch.load(cp_f))
     
     def save_loss(self, k):
-        name = os.path.splitext(self.config.loss_filename)[0] + f"_{k}" + os.path.splitext(self.config.loss_filename)[1]
+        name = f"{os.path.splitext(self.config.loss_filename)[0]}.{k}{os.path.splitext(self.config.loss_filename)[0]}"
         with open(name, "wb") as f:
             pickle.dump(self.losses, f)
 
     def load_loss(self):
-        if os.path.exists(self.config.loss_filename):
-            with open(self.config.loss_filename, "rb") as f:
+        names = glob.glob(f"{os.path.splitext(self.config.loss_filename)[0]}.*{os.path.splitext(self.config.loss_filename)[0]}")
+        if len(names):
+            self.epoch_start = int(names[-1].split(".")[1]) + 1
+            with open(names[-1], "rb") as f:
                 self.losses = pickle.load(f)
         else: self.losses = []
 
@@ -108,6 +114,5 @@ if __name__ == "__main__":
 
     model_trainer.load_parameters()
     model_trainer.train()
-    model_trainer.save_parameters()
 
     logging.basicConfig(level=logging.DEBUG)
