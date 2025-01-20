@@ -48,7 +48,6 @@ class VoxelCNNEncoder(nn.Module):
         
         # Add final linear layers with skip connection
         self.fc1 = nn.Linear(flattened_size, 512)
-        self.bn1 = nn.BatchNorm1d(512)
         self.fc2 = nn.Linear(512, latent_size)
         
     def forward(self, x):
