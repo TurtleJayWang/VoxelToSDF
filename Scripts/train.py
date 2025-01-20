@@ -77,7 +77,8 @@ class ModelTrainer:
         
     def save_parameters(self, k):
         name = f"{os.path.splitext(self.checkpoint_filename)[0]}.{k}{os.path.splitext(self.checkpoint_filename)[1]}"
-        with open(self.checkpoint_filename, "wb") as cp_f:
+        with open(name, "wb") as cp_f:
+            print("Checkpoint saved to", name)
             torch.save(self.network.state_dict(), cp_f)
         
     def load_parameters(self):
@@ -91,6 +92,7 @@ class ModelTrainer:
     def save_loss(self, k):
         name = f"{os.path.splitext(self.config.loss_filename)[0]}.{k}{os.path.splitext(self.config.loss_filename)[1]}"
         with open(name, "wb") as f:
+            print("Losses saved to", name)
             pickle.dump(self.losses, f)
 
     def load_loss(self):
