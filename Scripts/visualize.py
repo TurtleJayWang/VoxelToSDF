@@ -3,6 +3,7 @@ from skimage import measure
 import trimesh
 import json
 import os
+import glob
 
 import torch
 import torch.nn as nn
@@ -45,7 +46,7 @@ def get_sdf_from_model(full_network : module.FullNetwork, voxel_grid : np.ndarra
     sdfs = sdfs.numpy()
     return sdfs
 
-def generate_sdf_objs(dataset_json_path, fullmodel : module.FullNetwork, config : config.Config, categories="All"):
+def generate_sdf_objs(dataset_json_path, full_network : module.FullNetwork, config : config.Config, categories="All"):
     dataset_json = dict()
     with open(dataset_json_path, "r") as f:
         dataset_json = json.load(f)
@@ -65,7 +66,7 @@ def generate_sdf_objs(dataset_json_path, fullmodel : module.FullNetwork, config 
             _, _, voxel_grid = fulldata["points"], fulldata["sdfs"], fulldata["voxel_grid"]
 
             # Get the sdf values from model
-            sdfs = get_sdf_from_model(fullmodel, voxel_grid, config)
+            sdfs = get_sdf_from_model(full_network, voxel_grid, config)
             
             # Marching Cube
             verts, faces, normals, _ = measure.marching_cubes(sdfs, 0)
@@ -76,9 +77,13 @@ def generate_sdf_objs(dataset_json_path, fullmodel : module.FullNetwork, config 
                 mesh.export(f, "obj")
 
 if __name__ == "__main__":
-    x, y, z = np.mgrid[-2 : 2 : 0.04, -2 : 2 : 0.04, -2 : 2 : 0.04]
-    x = torch.tensor(x)
-    y = torch.tensor(y)
-    z = torch.tensor(z)
-    points = torch.stack((x, y, z), dim=3).view(-1, 3)
-    print(points.view(100, 100, 100, 3))
+    cfg = config.Config()
+    
+    full_network = module.FullNetwork(cfg)
+
+    checkpoint_filenames = glob.glob(f"{os.path.splitext(cfg.check_point_filename)[0]}.*{os.path.splitext(cfg.checkpoint_filename)[1]}")
+    if len(checkpoint_filenames):
+        with open(checkpoint_filenames[-1], "b+r") as cp_f:
+            full_network.load_state_dict(torch.load(cp_f))
+
+    generate_sdf_objs("data/dataset.json", full_network, cfg)
