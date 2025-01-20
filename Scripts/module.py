@@ -8,7 +8,7 @@ import numpy as np
 import config
 
 class VoxelCNNEncoder(nn.Module):
-    def __init__(self, input_size=(128, 128, 128), latent_size=256):
+    def __init__(self, input_size=(64, 64, 64), latent_size=256):
         super().__init__()
         
         self.input_size = input_size
