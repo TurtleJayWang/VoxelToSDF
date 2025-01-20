@@ -85,6 +85,7 @@ class ModelTrainer:
         if len(names):
             self.epoch_start = int(names[-1].split(".")[1]) + 1
             with open(names[-1], "b+r") as cp_f:
+                print("checkpoint loaded")
                 self.network.load_state_dict(torch.load(cp_f))
     
     def save_loss(self, k):
@@ -95,6 +96,7 @@ class ModelTrainer:
     def load_loss(self):
         names = glob.glob(f"{os.path.splitext(self.config.loss_filename)[0]}.*{os.path.splitext(self.config.loss_filename)[1]}")
         if len(names):
+            print("Losses loaded")
             self.epoch_start = int(names[-1].split(".")[1]) + 1
             with open(names[-1], "rb") as f:
                 self.losses = pickle.load(f)
