@@ -18,7 +18,7 @@ def get_sdf_from_model(full_network : module.FullNetwork, voxel_grid : np.ndarra
     encoder = full_network.encoder
     decoder = full_network.decoder
     
-    voxel_grid = torch.from_numpy(voxel_grid).unsqueeze(0).unsqueeze(1) # Shape: 1x1x64x64x64
+    voxel_grid = torch.from_numpy(voxel_grid).unsqueeze(0).unsqueeze(1).float() # Shape: 1x1x64x64x64
     voxel_grid = voxel_grid.to(config.device)
 
     # Initialize to mesh grid points
@@ -28,7 +28,7 @@ def get_sdf_from_model(full_network : module.FullNetwork, voxel_grid : np.ndarra
     z = torch.tensor(z)
 
     # Change the mesh grid points from 100x100x100x3 to 1000000x3
-    points = torch.stack((x, y, z), dim=3).view(-1, 3)
+    points = torch.stack((x, y, z), dim=3).view(-1, 3).float()
     points = points.to(config.device)
     # Split the points into 4 seperate splits to prevent running out of memory
     points_splits = points.split(250000)
@@ -36,11 +36,11 @@ def get_sdf_from_model(full_network : module.FullNetwork, voxel_grid : np.ndarra
     # Encode the voxel grid
     latent_code = encoder(voxel_grid) # Return tensor with shape 1x256
     latent_code = repeat(latent_code, "b n -> b s n", s=250000) # Convert the latent code from 1x256 to 1x250000x256
-    latent_code = rearrange(latent_code, "b n -> (b s) n") # Convert the latent code from 1x250000x256 to 250000x256
+    latent_code = rearrange(latent_code, "b s n -> (b s) n") # Convert the latent code from 1x250000x256 to 250000x256
 
     sdfs = torch.zeros(0, device="cpu")
     for points_split in points_splits:
-        sdf = torch.cat(sdf, decoder(latent_code, points_split).cpu())
+        sdfs = torch.cat((sdfs, decoder(latent_code, points_split).cpu()))
 
     sdfs = sdfs.view((100, 100, 100))
     sdfs = sdfs.numpy()
@@ -62,7 +62,7 @@ def generate_sdf_objs(dataset_json_path, full_network : module.FullNetwork, conf
     with torch.no_grad():
         for validation_model_np_file in tqdm(validation_models_np_file, desc="model"):
             # Get model data from npz file
-            fulldata = np.load(validation_model_np_file)
+            fulldata = np.load(os.path.join("data", validation_model_np_file))
             _, _, voxel_grid = fulldata["points"], fulldata["sdfs"], fulldata["voxel_grid"]
 
             # Get the sdf values from model
@@ -81,9 +81,9 @@ if __name__ == "__main__":
     
     full_network = module.FullNetwork(cfg)
 
-    checkpoint_filenames = glob.glob(f"{os.path.splitext(cfg.check_point_filename)[0]}.*{os.path.splitext(cfg.checkpoint_filename)[1]}")
+    checkpoint_filenames = glob.glob("Scripts/checkpoint.pkl")
     if len(checkpoint_filenames):
         with open(checkpoint_filenames[-1], "b+r") as cp_f:
             full_network.load_state_dict(torch.load(cp_f))
 
-    generate_sdf_objs("data/dataset.json", full_network, cfg)
+    generate_sdf_objs("data/dataset.json", full_network.to(cfg.device), cfg)
