@@ -20,6 +20,7 @@ import logging
 import pickle
 import glob
 import argparse
+import matplotlib.pyplot as plt
 
 class ModelTrainer:
     def __init__(self, train_dataloader : DataLoader, config : config.Config):
@@ -29,7 +30,7 @@ class ModelTrainer:
         self.network = FullNetwork(config=config)
         self.device = config.device
         self.checkpoint_filename = config.check_point_filename
-        self.losses = []
+        self.losses : torch.Tensor = torch.zeros(0)
 
         self.network = self.network.to(device=self.device)
 
@@ -43,7 +44,7 @@ class ModelTrainer:
 
         self.network.train()
         for k in tqdm(range(self.epoch), desc="Epoch", position=2):
-            batch_loss = 0
+            batch_loss = torch.zeros(1)
             length = 0
             for i, (voxel_tensor, point, sdf) in tqdm(enumerate(self.dataloader), desc="Batch", position=3, ncols=80, leave=False):
                 point = rearrange(point, "b s c -> (b s) c")
@@ -61,15 +62,15 @@ class ModelTrainer:
                 sdf_pred = self.network.decoder(latent, point)
 
                 loss = self.criterion(sdf_pred, sdf)
-                batch_loss += loss.item()
+                batch_loss += loss
+                length += 1
 
                 self.optimizer.zero_grad()
                 loss.backward()
 
                 self.optimizer.step()
-                length = i + 1
             
-            self.losses.append(batch_loss / length)
+            self.losses = torch.cat(self.losses, (batch_loss / length))
 
             self.save_parameters(self.epoch_start + k)
             self.save_loss(self.epoch_start + k)
@@ -99,6 +100,10 @@ class ModelTrainer:
                 self.losses = pickle.load(f)
         else: self.losses = []
 
+    def visualize_loss(self):
+        plt.plot(np.arange(len(self.losses.numpy())), self.losses.numpy())
+        plt.show()
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.WARNING)
 
@@ -114,5 +119,6 @@ if __name__ == "__main__":
 
     model_trainer.load_parameters()
     model_trainer.train()
+    model_trainer.visualize_loss()
 
     logging.basicConfig(level=logging.DEBUG)
