@@ -13,7 +13,7 @@ import config
 
 from tqdm import tqdm
 
-def get_sdf_from_model(full_network : module.FullNetwork, points : np.ndarray, sdfs : np.ndarray, voxel_grid : np.ndarray, config : config.Config):
+def get_sdf_from_model(full_network : module.FullNetwork, voxel_grid : np.ndarray, config : config.Config):
     encoder = full_network.encoder
     decoder = full_network.decoder
     
@@ -42,6 +42,8 @@ def get_sdf_from_model(full_network : module.FullNetwork, points : np.ndarray, s
         sdf = torch.cat(sdf, decoder(latent_code, points_split).cpu())
 
     sdfs = sdfs.view((100, 100, 100, 3))
+    sdfs = sdfs.numpy()
+    return sdfs
 
 def generate_sdf_objs(dataset_json_path, fullmodel : module.FullNetwork, config : config.Config, categories="All"):
     dataset_json = dict()
@@ -60,14 +62,15 @@ def generate_sdf_objs(dataset_json_path, fullmodel : module.FullNetwork, config 
         for validation_model_np_file in tqdm(validation_models_np_file, desc="model"):
             # Get model data from npz file
             fulldata = np.load(validation_model_np_file)
-            points, sdfs, voxel_grid = fulldata["points"], fulldata["sdfs"], fulldata["voxel_grid"]
+            _, _, voxel_grid = fulldata["points"], fulldata["sdfs"], fulldata["voxel_grid"]
 
             # Get the sdf values from model
-            sdf = get_sdf_from_model(fullmodel, points, sdfs, voxel_grid)
+            sdfs = get_sdf_from_model(fullmodel, voxel_grid)
             
             # Marching Cube
-            verts, faces, normals, _ = measure.marching_cubes(sdf, 0)
+            verts, faces, normals, _ = measure.marching_cubes(sdfs, 0)
             
+            # Output the result into mesh
             mesh = trimesh.Trimesh(vertices=verts, faces=faces, face_normals=normals)
             with open(os.path.splitext(validation_model_np_file)[0] + ".obj", "w") as f:
                 mesh.export(f, "obj")
