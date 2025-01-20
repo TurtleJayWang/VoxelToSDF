@@ -11,7 +11,7 @@
     "shapenet_categories" : ["02747177"],
     "seperate_ratio" : [0.8, 0.2],
     "check_point_filename" : "checkpoints/checkpoint.pkl",
-    "loss_filename" : "checkpoints/loss.pkl",
+    "loss_filename" : "losses/loss.pkl",
     "is_train" : 1,
     "is_validation" : 1
 }
