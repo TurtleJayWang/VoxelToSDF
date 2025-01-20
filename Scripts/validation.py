@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 
 from einops import rearrange, repeat
@@ -48,6 +49,9 @@ def validation(network : FullNetwork, validation_loader : DataLoader, config : c
     loss_stddev = np.std(losses)
     print(f"Average of losses: {loss_avg}")
     print(f"Standard deviation of losses: {loss_stddev}")
+
+    plt.plot(x=np.arange(len(losses)), y=losses)
+    plt.show()
 
 if __name__ == "__main__":
     cfg = config.Config()
