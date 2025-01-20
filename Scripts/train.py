@@ -69,21 +69,22 @@ class ModelTrainer:
             
             self.losses.append(batch_loss / length)
 
-            if k % 10 == 0 and k != 0:
-                self.save_parameters()
-                self.save_loss()
+            self.save_parameters(k)
+            self.save_loss(k)
         
-    def save_parameters(self):
+    def save_parameters(self, k):
         with open(self.checkpoint_filename, "wb") as cp_f:
             torch.save(self.network.state_dict(), cp_f)
         
-    def load_parameters(self):
+    def load_parameters(self, k):
         if os.path.exists(self.checkpoint_filename):
-            with open(self.checkpoint_filename, "b+r") as cp_f:
+            name = os.path.splitext(self.checkpoint_filename)[0] + f"_{k}" + os.path.splitext(self.checkpoint_filename)[1]
+            with open(name, "b+r") as cp_f:
                 self.network.load_state_dict(torch.load(cp_f))
     
-    def save_loss(self):
-        with open(self.config.loss_filename, "wb") as f:
+    def save_loss(self, k):
+        name = os.path.splitext(self.config.loss_filename)[0] + f"_{k}" + os.path.splitext(self.config.loss_filename)[1]
+        with open(name, "wb") as f:
             pickle.dump(self.losses, f)
 
     def load_loss(self):
