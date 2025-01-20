@@ -44,7 +44,7 @@ class ModelTrainer:
 
         self.network.train()
         for k in tqdm(range(self.epoch), desc="Epoch", position=2):
-            batch_loss = torch.zeros(1)
+            batch_loss = torch.zeros(1).to(self.config.device)
             length = 0
             for i, (voxel_tensor, point, sdf) in tqdm(enumerate(self.dataloader), desc="Batch", position=3, ncols=80, leave=False):
                 point = rearrange(point, "b s c -> (b s) c")
@@ -80,8 +80,8 @@ class ModelTrainer:
         with open(self.checkpoint_filename, "wb") as cp_f:
             torch.save(self.network.state_dict(), cp_f)
         
-    def load_parameters(self, k):
-        names = glob.glob(f"{os.path.splitext(self.checkpoint_filename)[0]}.*{os.path.splitext(self.checkpoint_filename)[1]}")[-1]
+    def load_parameters(self):
+        names = glob.glob(f"{os.path.splitext(self.checkpoint_filename)[0]}.*{os.path.splitext(self.checkpoint_filename)[1]}")
         if len(names):
             self.epoch_start = int(names[-1].split(".")[1]) + 1
             with open(names[-1], "b+r") as cp_f:
@@ -101,7 +101,7 @@ class ModelTrainer:
         else: self.losses = []
 
     def visualize_loss(self):
-        plt.plot(np.arange(len(self.losses.numpy())), self.losses.numpy())
+        plt.plot(np.arange(len(self.losses.cpu().numpy())), self.losses.cpu().numpy())
         plt.show()
 
 if __name__ == "__main__":
