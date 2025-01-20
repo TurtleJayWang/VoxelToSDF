@@ -35,12 +35,7 @@ class VoxelCNNEncoder(nn.Module):
             
             nn.Flatten()
         )
-        
-        # Calculate the size of the flattened features
-        # Input: 128x128x128
-        # After first block: 128x128x128 -> 64x64x64
-        # After second block: 16x16x16 -> 8x8x8
-        # After third block: 2x2x2 -> 1x1x1
+
         flattened_size = 64 * 1 * 1 * 1
         
         # Add final linear layers with skip connection
