@@ -98,7 +98,7 @@ class ModelTrainer:
             self.epoch_start = int(names[-1].split(".")[1]) + 1
             with open(names[-1], "rb") as f:
                 self.losses = pickle.load(f)
-        else: self.losses = []
+        else: self.losses = torch.zeros(0)
 
     def visualize_loss(self):
         plt.plot(np.arange(len(self.losses.cpu().numpy())), self.losses.cpu().numpy())
