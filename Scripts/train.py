@@ -84,10 +84,18 @@ class ModelTrainer:
     def load_parameters(self):
         names = glob.glob(f"{os.path.splitext(self.checkpoint_filename)[0]}.*{os.path.splitext(self.checkpoint_filename)[1]}")
         if len(names):
-            self.epoch_start = int(names[-1].split(".")[1]) + 1
-            with open(names[-1], "b+r") as cp_f:
-                print("checkpoint loaded", names[-1])
-                self.network.load_state_dict(torch.load(cp_f))
+            max_epoch = 0
+            load_checkpoint_file_name = ""
+            for name in names:
+                epoch = int(name.split(".")[-2])
+                if epoch > max_epoch:
+                    max_epoch = epoch
+                    load_checkpoint_file_name = name
+            self.epoch_start = max_epoch
+            with open(load_checkpoint_file_name, "rb") as f:
+                self.losses = pickle.load(f)
+                print("Losses loaded", load_checkpoint_file_name)
+        else: self.losses = torch.zeros(0)
     
     def save_loss(self, k):
         name = f"{os.path.splitext(self.config.loss_filename)[0]}.{k}{os.path.splitext(self.config.loss_filename)[1]}"
@@ -98,10 +106,17 @@ class ModelTrainer:
     def load_loss(self):
         names = glob.glob(f"{os.path.splitext(self.config.loss_filename)[0]}.*{os.path.splitext(self.config.loss_filename)[1]}")
         if len(names):
-            print("Losses loaded", names[-1])
-            self.epoch_start = int(names[-1].split(".")[1]) + 1
-            with open(names[-1], "rb") as f:
+            max_epoch = 0
+            load_loss_file_name = ""
+            for name in names:
+                epoch = int(name.split(".")[-2])
+                if epoch > max_epoch:
+                    max_epoch = epoch
+                    load_loss_file_name = name
+            self.epoch_start = max_epoch
+            with open(load_loss_file_name, "rb") as f:
                 self.losses = pickle.load(f)
+                print("Losses loaded", load_loss_file_name)
         else: self.losses = torch.zeros(0)
 
     def visualize_loss(self):
