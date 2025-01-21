@@ -61,6 +61,7 @@ if __name__ == "__main__":
     _, validation_dataloader = train_dataloader, validation_loader = create_test_validation_data_loader(
         dataset_dir=cfg.dataset_path, 
         dataset_config_file="dataset/config.json",
+        batch_size=32,
         num_sdf_samples_per_minor_batch=cfg.num_points_per_minor_batch
     )
     validation(network, validation_dataloader, cfg)
