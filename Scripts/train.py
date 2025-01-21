@@ -105,7 +105,7 @@ class ModelTrainer:
         else: self.losses = torch.zeros(0)
 
     def visualize_loss(self):
-        plt.plot(np.arange(len(self.losses.cpu().numpy())), self.losses.cpu().numpy())
+        plt.plot(np.arange(len(self.losses.cpu().detach().numpy())), self.losses.cpu().detach().numpy())
         plt.show()
 
 if __name__ == "__main__":
