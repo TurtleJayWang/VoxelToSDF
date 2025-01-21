@@ -95,7 +95,7 @@ class ModelTrainer:
             with open(load_checkpoint_file_name, "rb") as f:
                 self.network.load_state_dict(torch.load(f))
                 print("Checkpoint loaded", load_checkpoint_file_name)
-        else: self.losses = torch.zeros(0)
+                self.network.to(self.config.device)
     
     def save_loss(self, k):
         name = f"{os.path.splitext(self.config.loss_filename)[0]}.{k}{os.path.splitext(self.config.loss_filename)[1]}"
