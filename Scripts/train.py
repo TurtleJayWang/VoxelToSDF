@@ -22,6 +22,11 @@ import glob
 import argparse
 import matplotlib.pyplot as plt
 
+def loss(pred, target, clamp_dist=0.1) -> torch.Tensor:
+    clamped_pred = torch.clamp(pred, -torch.ones(pred.shape) * clamp_dist, torch.ones(pred.shape) * clamp_dist)
+    clamped_target = torch.clamp(target, -torch.ones(pred.shape) * clamp_dist, torch.ones(pred.shape) * clamp_dist)
+    return torch.abs(clamped_pred - clamped_target)
+
 class ModelTrainer:
     def __init__(self, train_dataloader : DataLoader, config : config.Config):
         self.epoch = config.train_epoch
@@ -36,7 +41,7 @@ class ModelTrainer:
 
         self.config = config
 
-        self.criterion = nn.MSELoss()
+        self.criterion = loss
         self.optimizer = optim.Adam(self.network.parameters(), lr=config.learning_rate)
 
     def train(self):
@@ -135,6 +140,9 @@ if __name__ == "__main__":
     )
     
     model_trainer = ModelTrainer(train_dataloader=train_dataloader, config=cfg)
+
+    #model_trainer.load_loss()
+    #model_trainer.visualize_loss()
 
     model_trainer.load_parameters()
     model_trainer.train()
