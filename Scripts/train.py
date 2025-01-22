@@ -23,8 +23,11 @@ import argparse
 import matplotlib.pyplot as plt
 
 def loss(pred, target, clamp_dist=0.1) -> torch.Tensor:
-    clamped_pred = torch.clamp(pred, -torch.ones(pred.shape) * clamp_dist, torch.ones(pred.shape) * clamp_dist)
-    clamped_target = torch.clamp(target, -torch.ones(pred.shape) * clamp_dist, torch.ones(pred.shape) * clamp_dist)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device_negative_dists = (-torch.ones(pred.shape) * clamp_dist).to(device)
+    device_positive_dists = (-torch.ones(pred.shape) * clamp_dist).to(device)
+    clamped_pred = torch.clamp(pred, device_negative_dists, device_positive_dists)
+    clamped_target = torch.clamp(target, device_negative_dists, device_positive_dists)
     return torch.abs(clamped_pred - clamped_target)
 
 class ModelTrainer:
