@@ -79,6 +79,7 @@ class ModelTrainer:
 
             self.save_parameters(self.epoch_start + k)
             self.save_loss(self.epoch_start + k)
+            self.visualize_loss()
         
     def save_parameters(self, k):
         name = f"{os.path.splitext(self.checkpoint_filename)[0]}.{k}{os.path.splitext(self.checkpoint_filename)[1]}"
