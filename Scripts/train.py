@@ -145,9 +145,6 @@ if __name__ == "__main__":
     
     model_trainer = ModelTrainer(train_dataloader=train_dataloader, config=cfg)
 
-   # model_trainer.load_loss()
-   # model_trainer.visualize_loss()
-
     model_trainer.load_parameters()
     model_trainer.train()
     model_trainer.visualize_loss()
