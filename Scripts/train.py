@@ -28,7 +28,7 @@ def loss(pred, target, clamp_dist=0.1) -> torch.Tensor:
     device_positive_dists = (-torch.ones(pred.shape) * clamp_dist).to(device)
     clamped_pred = torch.clamp(pred, device_negative_dists, device_positive_dists)
     clamped_target = torch.clamp(target, device_negative_dists, device_positive_dists)
-    return torch.abs(clamped_pred - clamped_target)
+    return torch.abs(clamped_pred - clamped_target).sum() / clamped_pred.shape[0]
 
 class ModelTrainer:
     def __init__(self, train_dataloader : DataLoader, config : config.Config):
