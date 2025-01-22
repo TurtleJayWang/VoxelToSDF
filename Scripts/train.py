@@ -96,7 +96,7 @@ class ModelTrainer:
                 if epoch > max_epoch:
                     max_epoch = epoch
                     load_checkpoint_file_name = name
-            self.epoch_start = max_epoch
+            self.epoch_start = max_epoch + 1
             with open(load_checkpoint_file_name, "rb") as f:
                 self.network.load_state_dict(torch.load(f))
                 print("Checkpoint loaded", load_checkpoint_file_name)
@@ -118,7 +118,7 @@ class ModelTrainer:
                 if epoch > max_epoch:
                     max_epoch = epoch
                     load_loss_file_name = name
-            self.epoch_start = max_epoch
+            self.epoch_start = max_epoch + 1
             with open(load_loss_file_name, "rb") as f:
                 self.losses = pickle.load(f)
                 print("Losses loaded", load_loss_file_name)
